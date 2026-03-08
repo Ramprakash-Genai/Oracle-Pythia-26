@@ -1,0 +1,124 @@
+.qa-container {
+  display: flex;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+}
+
+.qa-sidebar {
+  width: 300px;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  background: #f9f9f9;
+}
+
+.qa-sidebar h2 {
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.qa-field {
+  margin-bottom: 20px;
+}
+
+.qa-field label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+.qa-field select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.qa-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.okay-btn, .cancel-btn {
+  flex: 1;
+  padding: 10px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.okay-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.qa-main {
+  flex: 1;
+  padding: 20px;
+}
+
+.qa-error-popup {
+  background: #fdd;
+  border: 1px solid red;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.qa-error-popup button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qa-story {
+  background: #fdfdfd;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.qa-story h3 {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.qa-meta {
+  margin: 15px 0;
+  padding: 12px;
+  background: #eef6f9;
+  border-left: 4px solid #4CAF50;
+  border-radius: 4px;
+}
+
+.qa-meta p {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.qa-description-list {
+  margin-left: 1.5rem;
+  list-style-type: disc;
+  line-height: 1.8;
+  font-size: 15px;
+  color: #222;
+}
+
+.qa-description-list li {
+  margin-bottom: 6px;
+}
