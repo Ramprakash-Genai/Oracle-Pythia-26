@@ -43,7 +43,8 @@
   justify-content: space-between;
 }
 
-.okay-btn, .cancel-btn {
+.okay-btn,
+.cancel-btn {
   flex: 1;
   padding: 10px;
   margin: 0 5px;
@@ -121,4 +122,195 @@
 
 .qa-description-list li {
   margin-bottom: 6px;
+}
+
+/* Button for generating test case */
+.create-test-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.create-test-btn:hover {
+  background-color: #005a9e;
+}
+
+/* Popup modal styles */
+.qa-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.qa-popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;   /* vertical scroll */
+  overflow-x: auto;   /* horizontal scroll */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.qa-popup-content h3 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.qa-testcase {
+  background: #f4f4f4;
+  padding: 15px;
+  border-radius: 6px;
+  font-family: monospace;
+  white-space: pre;       /* preserve spacing, no wrapping */
+  overflow-x: auto;       /* horizontal scroll if needed */
+  overflow-y: auto;       /* vertical scroll if needed */
+  max-height: 60vh;       /* keep within viewport */
+  margin-bottom: 20px;
+}
+
+.qa-popup-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.approve-btn,
+.regenerate-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+}
+
+.approve-btn {
+  background-color: #4CAF50;
+}
+
+.regenerate-btn {
+  background-color: #0078d4;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+}
+
+/* Loader overlay styles */
+.qa-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;   /* ✅ center loader */
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 6px solid #ddd;
+  border-top: 6px solid #0078d4;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.qa-loader p {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Confirmation popup for regenerate/approve */
+.qa-confirm-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
+
+.qa-confirm-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.qa-confirm-content h3 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.qa-confirm-content p {
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #333;
+}
+
+.qa-confirm-content button {
+  padding: 10px 20px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.qa-confirm-content button:hover {
+  background-color: #005a9e;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.confirm-success {
+  color: #4CAF50;   /* ✅ green for success */
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.confirm-path {
+  color: #0078d4;   /* ✅ nice blue for file path */
+  font-size: 14px;
+  font-family: monospace;
 }

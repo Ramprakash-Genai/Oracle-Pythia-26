@@ -5,9 +5,9 @@ from requests.auth import HTTPBasicAuth
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
+from app.core.models import Models   # ✅ Correct import path
 
 load_dotenv()
-
 
 app = FastAPI()
 
@@ -33,6 +33,16 @@ class SearchRequest(BaseModel):
     sprint: str | None = None
     key: str | None = None
 
+class TestCaseRequest(BaseModel):
+    User_Story_Summary: str
+    User_Story_Description: str
+    story_details: dict   # expects Sprint, Story_Assigned_To, Story_Number
+    prompt_file: str      # Path to prompt file (e.g., app/prompts/generate_test_case.txt)
+
+class ApproveRequest(BaseModel):
+    story_number: str
+    generated_test_case: str
+
 def parse_description(desc):
     if not desc or "content" not in desc:
         return ""
@@ -52,13 +62,14 @@ def parse_description(desc):
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI Jira backend is running. Use /projects, /sprints/{project_key}, /stories/{sprint_id}, or /search."}
+    return {
+        "message": "FastAPI Jira backend is running. Use /projects, /sprints/{project_key}, /stories/{sprint_id}, /search, /generate_testcase, or /approve_testcase."
+    }
 
 @app.get("/projects")
 def get_projects():
     url = f"https://{domain}/rest/api/3/project/search"
     response = requests.get(url, headers=headers, auth=auth)
-    print("Projects response:", response.text)  # <-- debug
     if response.status_code != 200:
         raise HTTPException(status_code=400, detail=f"Failed to fetch projects: {response.text}")
     projects = response.json().get("values", [])
@@ -93,7 +104,6 @@ def get_stories(sprint_id: int):
 
 @app.post("/search")
 def search_issue(req: SearchRequest):
-    # Build JQL dynamically
     jql_parts = [f'project = {req.project}']
     if req.sprint:
         jql_parts.append(f'sprint = {req.sprint}')
@@ -122,3 +132,32 @@ def search_issue(req: SearchRequest):
         "description": parse_description(issue["fields"].get("description")),
         "assignee": issue["fields"]["assignee"]["displayName"] if issue["fields"].get("assignee") else "Unassigned"
     }
+
+@app.post("/generate_testcase")
+def generate_testcase(req: TestCaseRequest):
+    try:
+        if not os.path.exists(req.prompt_file):
+            raise HTTPException(status_code=400, detail="Prompt file not found")
+        with open(req.prompt_file, "r", encoding="utf-8") as f:
+            prompt_text = f.read()
+
+        model = Models()
+        generated = model.generate_test_case(req.model_dump(), prompt_text)
+
+        return {"generated_test_case": generated}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/approve_testcase")
+def approve_testcase(req: ApproveRequest):
+    try:
+        folder = "app/LLM/generated_features"
+        os.makedirs(folder, exist_ok=True)
+        file_path = os.path.join(folder, f"{req.story_number}.feature")
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(req.generated_test_case)
+
+        return {"message": f"Test case saved as {file_path}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

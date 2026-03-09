@@ -8,8 +8,12 @@ function QABotUI() {
   const [projects, setProjects] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [stories, setStories] = useState([]);
+  const [generatedTestCase, setGeneratedTestCase] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState(null);
 
-  // Fetch projects
   useEffect(() => {
     fetch("http://localhost:5000/projects")
       .then(res => res.json())
@@ -17,7 +21,6 @@ function QABotUI() {
       .catch(err => console.error("Error fetching projects:", err));
   }, []);
 
-  // Fetch sprints when project changes
   useEffect(() => {
     if (inputs.project) {
       fetch(`http://localhost:5000/sprints/${inputs.project}`)
@@ -29,7 +32,6 @@ function QABotUI() {
     }
   }, [inputs.project]);
 
-  // Fetch stories when sprint changes
   useEffect(() => {
     if (inputs.sprint) {
       fetch(`http://localhost:5000/stories/${inputs.sprint}`)
@@ -44,6 +46,7 @@ function QABotUI() {
   const handleChange = (e) => setInputs({ ...inputs, [e.target.name]: e.target.value });
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:5000/search", {
         method: "POST",
@@ -59,17 +62,111 @@ function QABotUI() {
       }
     } catch {
       setError("Backend not reachable");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Helper to get sprint name by ID
   const getSprintName = (id) => {
     const sprint = sprints.find(s => String(s.id) === String(id));
     return sprint ? sprint.name : id;
   };
 
+  const handleGenerateTestCase = async () => {
+    setLoading(true);
+    const jsonData = {
+      User_Story_Summary: story.summary,
+      User_Story_Description: story.description,
+      story_details: {
+        Sprint: getSprintName(inputs.sprint),
+        Story_Assigned_To: story.assignee,
+        Story_Number: story.key
+      },
+      prompt_file: "app/prompts/generate_test_case.txt"
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/generate_testcase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData)
+      });
+      const result = await response.json();
+      setGeneratedTestCase(result.generated_test_case);
+      setShowPopup(true);
+    } catch (err) {
+      console.error("Error generating test case:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/approve_testcase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          story_number: story.key,
+          generated_test_case: generatedTestCase
+        })
+      });
+      const result = await response.json();
+      // ✅ Updated popup message
+      setConfirmMessage(
+        <>
+          <span className="confirm-success">Test Case Approved Successfully!</span><br/>
+          <span className="confirm-path">Test case saved path: {result.message}</span>
+        </>
+      );
+      setShowConfirm(true);
+      setShowPopup(false);
+    } catch (err) {
+      console.error("Error approving test case:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    setLoading(true);
+    await handleGenerateTestCase();
+    setLoading(false);
+    // ✅ Updated popup message
+    setConfirmMessage(<span className="confirm-success">Successfully Generated a New Test Case!</span>);
+    setShowConfirm(true);
+  };
+
+  const handleCancel = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setShowPopup(false);
+      setLoading(false);
+    }, 500);
+  };
+
   return (
     <div className="qa-container">
+      {/* Loader overlay */}
+      {loading && (
+        <div className="qa-loader">
+          <div className="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      )}
+
+      {/* Confirmation popup */}
+      {showConfirm && (
+        <div className="qa-confirm-popup">
+          <div className="qa-confirm-content">
+            <h3>Notification</h3>
+            <p>{confirmMessage}</p>
+            <button className="okay-btn" onClick={() => setShowConfirm(false)}>OKAY</button>
+          </div>
+        </div>
+      )}
+
       <div className="qa-sidebar">
         <h2>Next Gen QA BOT</h2>
 
@@ -129,6 +226,24 @@ function QABotUI() {
               <p><strong>Story Assigned to:</strong> {story.assignee}</p>
               <p><strong>Story Number:</strong> {story.key}</p>
             </div>
+
+            <button className="create-test-btn" onClick={handleGenerateTestCase}>
+              Generate a test case
+            </button>
+          </div>
+        )}
+
+        {showPopup && (
+          <div className="qa-popup">
+            <div className="qa-popup-content">
+              <h3>Generated Test Case</h3>
+              <pre className="qa-testcase">{generatedTestCase}</pre>
+              <div className="qa-popup-buttons">
+                <button className="approve-btn" onClick={handleApprove}>TEST CASE APPROVED</button>
+                <button className="regenerate-btn" onClick={handleRegenerate}>REGENERATE THE TEST CASE</button>
+                <button className="cancel-btn" onClick={handleCancel}>CANCEL</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -137,3 +252,4 @@ function QABotUI() {
 }
 
 export default QABotUI;
+
